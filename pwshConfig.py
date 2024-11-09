@@ -131,6 +131,27 @@ if (!(Test-Path -Path $PROFILE)) {{
             print(f"Command output: {e.output}")
             return False
 
+
+    def install_oh_my_posh_config(self) -> bool:
+        """
+        Install Oh My Posh configuration.
+
+        Returns:
+            bool: True if installation was successful, False otherwise.
+        """
+        try:
+            oh_my_posh_config_path = Path.home() / ".config" / "ohmyposh"
+            oh_my_posh_config_path.mkdir(parents=True, exist_ok=True)
+
+            Copy_base_json:str = "Copy-Item "r"./base.json" f"-Destination {oh_my_posh_config_path}"
+            subprocess.run(Copy_base_json, check=True, capture_output=True, text=True)
+
+            print("Oh My Posh configuration installed successfully.")
+            return True
+        except Exception as e:
+            print(f"Error installing Oh My Posh configuration: {e}")
+            return False
+    
     def setup_environment(self) -> bool:
         """
         Complete setup of the environment by running all installation and configuration steps.
@@ -142,7 +163,8 @@ if (!(Test-Path -Path $PROFILE)) {{
             (self.install_python_packages, "Installing Python packages"),
             (self.install_necessary_packages, "Installing necessary packages"),
             (self.install_pwsh_profile, "Creating PowerShell profile"),
-            (self.configure_pwsh_profile, "Configuring PowerShell profile")
+            (self.configure_pwsh_profile, "Configuring PowerShell profile"),
+            (self.install_oh_my_posh_config, "Installing Oh My Posh configuration")
         ]
         
         success = True
