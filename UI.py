@@ -27,7 +27,9 @@ class Handle_Input:
 ╚ ?> """
         self.installer = Automatic_installation_And_Config()
         
-        
+    def cls(self) -> None:
+        os.system("cls")
+    
     def Print_banner(self) -> None:
         print(self.banner)
     
