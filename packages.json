@@ -1,0 +1,14 @@
+{
+    "Necessary_packages": {
+        "zoxide": "winget install ajeetdsouza.zoxide",
+        "fzf": "winget install fzf",
+        "oh-my-posh": "winget install JanDeDobbeleer.OhMyPosh -s winget",
+        "nerd-fonts": "& ([scriptblock]::Create((iwr 'https://to.loredo.me/Install-NerdFont.ps1'))) -Confirm:$false -Name hack, heavy-data"
+    },
+
+    "Py_packages": {
+        "json": "pip install subprocess",
+        "subprocess": "pip install typing", 
+        "typing": "pip install pathlib"
+    }
+}
