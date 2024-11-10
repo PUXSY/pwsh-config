@@ -13,7 +13,7 @@ class Handle_Input:
 | .__/ \\_/\\_/ |___/_| |_\\____/\\___/|_| |_|_| |_|\\__, |
 |_|                                             |___/ 
            ╔════════════════════════════╗
-           ╠════════Version 1.0═════════╣
+           ╠════════Version 1.2═════════╣
            ╠═════════ @ PUXY ═══════════╣
            ╚════════════════════════════╝"""
         self.options: str = """
@@ -44,6 +44,7 @@ class Handle_Input:
             self.installer.setup_environment()
             
         elif user_input == "2":
+            os.system("cls")
             print("Manual installation")
             
         elif user_input == "3":

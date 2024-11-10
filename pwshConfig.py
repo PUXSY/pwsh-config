@@ -45,9 +45,8 @@ class Automatic_installation_And_Config:
             except subprocess.CalledProcessError as e:
                 print(f"Error installing Python packages: {e}")
                 print(f"Command output: {e.output}")
+                input("Press any to continue...")
                 return False
-        
-
         
     def install_necessary_packages(self) -> bool:
         """
@@ -58,15 +57,21 @@ class Automatic_installation_And_Config:
         """
         try:
             for command in self.necessary_package_commands:
-                result = subprocess.run(command, shell=True, check=True, 
-                                     capture_output=True, text=True)
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
                 print(f"Executed: {command}")
                 print(result.stdout)
+                # Continue even if package is already installed
+                if result.returncode != 0 and ("No available upgrade found" in result.stdout or 
+                                            "already installed" in result.stdout):
+                    continue
+                elif result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, command)
             print("Necessary packages installed successfully.")
             return True
         except subprocess.CalledProcessError as e:
             print(f"Error installing necessary packages: {e}")
             print(f"Command output: {e.output}")
+            input("Press any to continue...")
             return False
 
     def install_pwsh_profile(self) -> bool:
@@ -97,6 +102,7 @@ if (!(Test-Path -Path $PROFILE)) {{
         except subprocess.CalledProcessError as e:
             print(f"Error creating PowerShell profile: {e}")
             print(f"Command output: {e.output}")
+            input("Press any to continue...")
             return False
 
     def configure_pwsh_profile(self) -> bool:
@@ -129,8 +135,8 @@ if (!(Test-Path -Path $PROFILE)) {{
         except subprocess.CalledProcessError as e:
             print(f"Error configuring PowerShell profile: {e}")
             print(f"Command output: {e.output}")
+            input("Press any to continue...")
             return False
-
 
     def install_oh_my_posh_config(self) -> bool:
         """
@@ -150,6 +156,7 @@ if (!(Test-Path -Path $PROFILE)) {{
             return True
         except Exception as e:
             print(f"Error installing Oh My Posh configuration: {e}")
+            input("Press any to continue...")
             return False
     
     def setup_environment(self) -> bool:

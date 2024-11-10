@@ -7,8 +7,7 @@
     },
 
     "Py_packages": {
-        "json": "pip install subprocess",
-        "subprocess": "pip install typing", 
-        "typing": "pip install pathlib"
+        "typing": "pip install typing", 
+        "pathlib": "pip install pathlib"
     }
 }
