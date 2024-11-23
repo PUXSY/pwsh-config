@@ -21,7 +21,6 @@
     ```bash
     python main.py
 
-
 # Contributions
 Feel free to contribute by submitting issues or pull requests!
 
