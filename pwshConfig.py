@@ -3,6 +3,38 @@ import sys
 from typing import List
 from pathlib import Path
 from JsonManager import JsonManager
+import shutil
+
+class PowerShellManager:
+    @staticmethod
+    def check_powershell_core():
+        """Check if PowerShell Core (pwsh) is available and install if needed."""
+        try:
+            # First check if pwsh is available in PATH
+            if shutil.which('pwsh') is not None:
+                return True
+                
+            print("PowerShell Core (pwsh) not found. Checking if it needs to be installed...")
+            
+            # Try to install PowerShell Core using winget
+            install_command = "winget install --id Microsoft.PowerShell --source winget"
+            print("Installing PowerShell Core...")
+            result = subprocess.run(install_command, shell=True, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                if "already installed" in result.stdout:
+                    print("PowerShell Core is installed but not in PATH. Please restart your terminal.")
+                    return False
+                print("Failed to install PowerShell Core. Please install it manually from:")
+                print("https://github.com/PowerShell/PowerShell/releases")
+                return False
+                
+            print("PowerShell Core installed successfully. Please restart your terminal and try again.")
+            return False
+            
+        except Exception as e:
+            print(f"Error checking/installing PowerShell Core: {str(e)}")
+            return False
 
 class Automatic_installation_And_Config:
     """
@@ -300,6 +332,11 @@ Add-Content -Path $PROFILE -Value @"
         Returns:
             bool: True if all steps completed successfully, False otherwise.
         """
+        if not PowerShellManager.check_powershell_core():
+            print("\nPlease restart your terminal after PowerShell Core installation and run this script again.")
+            input("Press any key to continue...")
+            return False
+        
         steps = [
             (self.install_python_packages, "Installing Python packages"),
             (self.install_necessary_packages, "Installing necessary packages"),
