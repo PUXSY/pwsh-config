@@ -1,28 +1,54 @@
-# PowerShell Config Manager
+# 🚀 PowerShell Configuration
 
-**PowerShell Config Manager** is a Python-based toolkit for managing PowerShell configurations with ease. Whether you're setting up packages, handling JSON configurations, or customizing your environment, this project provides the tools you need in a streamlined way.
+A sleek and powerful PowerShell configuration setup designed to supercharge your command-line experience.
 
-## Features
-- **JSON Management**: Simplify configuration handling with `JsonManager.py`.
-- **PowerShell Integrations**: Automate and organize settings using `pwshConfig.py`.
-- **Custom Package Setup**: Manage packages via `packages.json`.
+## ✨ Features
 
-## Requirements
-- Python 3.x
-- PowerShell installed on your system
+- Custom PowerShell profile configuration
+- Enhanced productivity tools and aliases 
+- Modern command-line experience
+- Cross-platform compatibility (Windows, Linux, macOS)
 
-## Usage
-1. Clone the repository:  
-   ```bash
-   git clone https://github.com/PUXSY/pwsh-config.git
-2. Install required Python packages (if any).
+## 🛠️ Installation
 
-3. Run the script:
-    ```bash
-    python main.py
+1. Clone this repository:
+```powershell
+git clone https://github.com/PUXSY/pwsh-config.git
+```
 
-# Contributions
-Feel free to contribute by submitting issues or pull requests!
+2. Navigate to the project directory:
+```powershell
+cd pwsh-config
+```
 
-Copy and paste this into your project's README file! Let me know if you want more sections, like FAQs or detailed examples.
+3. Run the setup script (if applicable):
+```powershell
+py main.py
+```
 
+## 🔧 Requirements
+
+- PowerShell 5.4 or higher
+- Git (for installation)
+- Windows Terminal (recommended for best experience)
+
+## 📦 What's Included
+
+This configuration package includes:
+
+- Custom Oh-My-Posh profile
+- Install fzf a general-purpose command-line fuzzy finder
+- Install zoxide a smarter cd command, inspired by z and autojump
+- Set Up PowerShell config
+
+
+## 🤝 Contributing
+
+Feel free to contribute to this project by:
+1. Forking the repository
+2. Creating a feature branch
+3. Committing your changes
+4. Opening a pull request
+
+
+#### Made with ❤️ by [@PUXSY](https://github.com/PUXSY)
