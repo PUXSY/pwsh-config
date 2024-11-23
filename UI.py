@@ -13,7 +13,7 @@ class Handle_Input:
 | .__/ \\_/\\_/ |___/_| |_\\____/\\___/|_| |_|_| |_|\\__, |
 |_|                                             |___/ 
            ╔════════════════════════════╗
-           ╠════════Version 1.2═════════╣
+           ╠════════Version 2.0═════════╣
            ╠═════════ @ PUXY ═══════════╣
            ╚════════════════════════════╝"""
         self.options: str = """
@@ -25,6 +25,12 @@ class Handle_Input:
 ║  ╚╗
 ║  [3] Exit
 ╚ ?> """
+        self.success: str = """                          
+ ___ _   _  ___ ___ ___  ___ ___ 
+/ __| | | |/ __/ __/ _ \\/ __/ __|
+\\__ \\ |_| | (_| (_|  __/\\__ \\__ \\
+|___/\\__,_|\\___\\___\\___||___/___/ 
+"""
         self.installer = Automatic_installation_And_Config()
         
     def cls(self) -> None:
@@ -41,7 +47,8 @@ class Handle_Input:
         if user_input == "1":
             os.system("cls")
             print("Automatic installation")
-            self.installer.setup_environment()
+            if self.installer.setup_environment() == True:
+                print(self.success)
             
         elif user_input == "2":
             os.system("cls")

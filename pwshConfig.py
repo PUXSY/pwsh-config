@@ -20,6 +20,104 @@ class Automatic_installation_And_Config:
         self.powershell_dir = Path.home() / "Documents" / "PowerShell"
         self.profile_path = self.powershell_dir / "Microsoft.PowerShell_profile.ps1"
 
+    def install_nerd_fonts(self) -> bool:
+        """
+        Install Nerd Fonts using PowerShell commands.
+        
+        Returns:
+            bool: True if installation was successful, False otherwise.
+        """
+        try:
+            # Create a PowerShell script to download and install Nerd Fonts
+            install_fonts_command = """
+            $webClient = New-Object System.Net.WebClient
+            $fontsUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1"
+            $fonts = @("Hack", "HeavyData")
+            
+            foreach ($font in $fonts) {
+                try {
+                    Write-Host "Downloading $font Nerd Font..."
+                    $zipFile = "$env:TEMP\\$font.zip"
+                    $fontUrl = "$fontsUrl/$font.zip"
+                    $webClient.DownloadFile($fontUrl, $zipFile)
+                    
+                    Write-Host "Installing $font Nerd Font..."
+                    Expand-Archive -Path $zipFile -DestinationPath "$env:TEMP\\$font" -Force
+                    
+                    $fontFiles = Get-ChildItem -Path "$env:TEMP\\$font" -Include '*.ttf','*.otf' -Recurse
+                    foreach ($fontFile in $fontFiles) {
+                        $destination = Join-Path $env:LOCALAPPDATA 'Microsoft\\Windows\\Fonts' $fontFile.Name
+                        Copy-Item -Path $fontFile.FullName -Destination $destination -Force
+                        
+                        # Add font to registry
+                        $regValue = Join-Path $env:LOCALAPPDATA "Microsoft\\Windows\\Fonts\\$($fontFile.Name)"
+                        New-ItemProperty -Path "HKCU:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts" -Name $fontFile.Name -Value $regValue -Force
+                    }
+                    
+                    Remove-Item -Path $zipFile -Force
+                    Remove-Item -Path "$env:TEMP\\$font" -Recurse -Force
+                    Write-Host "$font Nerd Font installed successfully."
+                }
+                catch {
+                    Write-Error "Failed to install $font Nerd Font: $_"
+                    exit 1
+                }
+            }
+            """
+            
+            # Execute the PowerShell script
+            result = subprocess.run(
+                ['pwsh', '-Command', install_fonts_command],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            print("Nerd Fonts installed successfully.")
+            return True
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing Nerd Fonts: {e}")
+            print(f"Command output: {e.stdout}")
+            print(f"Error output: {e.stderr}")
+            input("Press any key to continue...")
+            return False
+
+    def install_necessary_packages(self) -> bool:
+        """
+        Install necessary packages using winget commands.
+        
+        Returns:
+            bool: True if installation was successful, False otherwise.
+        """
+        try:
+            for command in self.necessary_package_commands:
+                # Skip the Nerd Fonts installation command from winget
+                if "Install-NerdFont.ps1" in command:
+                    continue
+                    
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                print(f"Executed: {command}")
+                print(result.stdout)
+                # Continue even if package is already installed
+                if result.returncode != 0 and ("No available upgrade found" in result.stdout or 
+                                            "already installed" in result.stdout):
+                    continue
+                elif result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, command)
+            
+            # Install Nerd Fonts separately
+            if not self.install_nerd_fonts():
+                return False
+                
+            print("Necessary packages installed successfully.")
+            return True
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing necessary packages: {e}")
+            print(f"Command output: {e.output}")
+            input("Press any to continue...")
+            return False
+
     def install_python_packages(self) -> bool:
         """
         Install Python packages using pip commands.
@@ -47,32 +145,6 @@ class Automatic_installation_And_Config:
                 print(f"Command output: {e.output}")
                 input("Press any to continue...")
                 return False
-        
-    def install_necessary_packages(self) -> bool:
-        """
-        Install necessary packages using winget commands.
-        
-        Returns:
-            bool: True if installation was successful, False otherwise.
-        """
-        try:
-            for command in self.necessary_package_commands:
-                result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                print(f"Executed: {command}")
-                print(result.stdout)
-                # Continue even if package is already installed
-                if result.returncode != 0 and ("No available upgrade found" in result.stdout or 
-                                            "already installed" in result.stdout):
-                    continue
-                elif result.returncode != 0:
-                    raise subprocess.CalledProcessError(result.returncode, command)
-            print("Necessary packages installed successfully.")
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"Error installing necessary packages: {e}")
-            print(f"Command output: {e.output}")
-            input("Press any to continue...")
-            return False
 
     def install_pwsh_profile(self) -> bool:
         """
@@ -117,16 +189,31 @@ if (!(Test-Path -Path $PROFILE)) {{
             return False
 
         try:
+            # Read existing profile content
+            existing_content = self.profile_path.read_text()
+            
             commands = [
-                "Invoke-Expression (& { (zoxide init powershell | Out-String) })",
-                "oh-my-posh init pwsh --config '~\\.config\\ohmyposh\\base.json' | Invoke-Expression"
+                "Invoke-Expression (& { (zoxide init --cmd cd powershell | Out-String) })",
+                "oh-my-posh init pwsh --config '~\.config\ohmyposh\zen.toml' | Invoke-Expression"
             ]
             
-            add_content_command = f"""
-            Add-Content -Path $PROFILE -Value @'
-            {chr(10).join(commands)}
-'@
-            """
+            # Check if all commands are already in the profile
+            all_commands_present = all(command in existing_content for command in commands)
+            
+            if all_commands_present:
+                print("PowerShell profile already configured.")
+                return True
+            
+            # Join commands with newlines
+            commands_text = "\n".join(commands)
+            
+            add_content_command = f'''
+Add-Content -Path $PROFILE -Value @"
+
+# Added by PowerShell Configuration Script
+{commands_text}
+"@
+'''
             
             result = subprocess.run(['pwsh', '-Command', add_content_command],
                                  check=True, capture_output=True, text=True)
@@ -146,17 +233,64 @@ if (!(Test-Path -Path $PROFILE)) {{
             bool: True if installation was successful, False otherwise.
         """
         try:
+            # Define paths
             oh_my_posh_config_path = Path.home() / ".config" / "ohmyposh"
+            zen_toml_source = Path.cwd() / "zen.toml"
+            zen_toml_dest = oh_my_posh_config_path / "zen.toml"
+
+            # Create config directory if it doesn't exist
+            print(f"Creating Oh-My-Posh configuration directory at: {oh_my_posh_config_path}")
             oh_my_posh_config_path.mkdir(parents=True, exist_ok=True)
 
-            Copy_base_json:str = "Copy-Item "r"./base.json" f"-Destination {oh_my_posh_config_path}"
-            subprocess.run(Copy_base_json, check=True, capture_output=True, text=True)
+            # Check if source file exists
+            if not zen_toml_source.exists():
+                print(f"Error: zen.toml not found in current directory: {zen_toml_source}")
+                print("Please ensure zen.toml is in the same directory as the script.")
+                return False
 
-            print("Oh My Posh configuration installed successfully.")
-            return True
+            # Try to copy using Python's Path
+            try:
+                print(f"Copying {zen_toml_source} to {zen_toml_dest}")
+                import shutil
+                shutil.copy2(zen_toml_source, zen_toml_dest)
+            except PermissionError:
+                print("Permission denied. Attempting to copy using PowerShell with elevated privileges...")
+                # Fallback to PowerShell with explicit error handling
+                copy_command = f"""
+                $source = '{zen_toml_source}'
+                $destination = '{zen_toml_dest}'
+                try {{
+                    Copy-Item -Path $source -Destination $destination -Force -ErrorAction Stop
+                    Write-Output "File copied successfully using PowerShell"
+                }} catch {{
+                    Write-Error "PowerShell copy failed: $_"
+                    exit 1
+                }}
+                """
+                result = subprocess.run(
+                    ['pwsh', '-Command', copy_command],
+                    capture_output=True,
+                    text=True
+                )
+                if result.returncode != 0:
+                    print(f"PowerShell copy failed with error: {result.stderr}")
+                    return False
+
+            # Verify the file was copied successfully
+            if zen_toml_dest.exists():
+                print("Oh My Posh configuration installed successfully.")
+                print(f"Configuration file location: {zen_toml_dest}")
+                return True
+            else:
+                print(f"Error: Configuration file was not copied to {zen_toml_dest}")
+                return False
+
         except Exception as e:
-            print(f"Error installing Oh My Posh configuration: {e}")
-            input("Press any to continue...")
+            print(f"Error installing Oh My Posh configuration: {str(e)}")
+            print("Stack trace:")
+            import traceback
+            print(traceback.format_exc())
+            input("Press any key to continue...")
             return False
     
     def setup_environment(self) -> bool:
