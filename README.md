@@ -12,17 +12,17 @@ A sleek and powerful PowerShell configuration setup designed to supercharge your
 ## 🛠️ Installation
 
 1. Clone this repository:
-```powershell
+```bash
 git clone https:/github.com/PUXSY/pwsh-config.git
 ```
 
 2. Navigate to the project directory:
-```powershell
+```bash
 cd pwsh-config
 ```
 
 3. Run the setup script (if applicable):
-```powershell
+```bash
 py main.py
 ```
 
