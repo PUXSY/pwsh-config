@@ -13,7 +13,7 @@ A sleek and powerful PowerShell configuration setup designed to supercharge your
 
 1. Clone this repository:
 ```powershell
-git clone https://github.com/PUXSY/pwsh-config.git
+git clone https:/github.com/PUXSY/pwsh-config.git
 ```
 
 2. Navigate to the project directory:
